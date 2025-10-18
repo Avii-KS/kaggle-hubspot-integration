@@ -1,0 +1,22 @@
+{
+  "name": "kaggle-hubspot-integration",
+  "version": "1.0.0",
+  "description": "Automated data pipeline to scrape baby names from Kaggle and sync to HubSpot CRM",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "test": "echo \"Tests coming soon\" && exit 0"
+  },
+  "keywords": [
+    "kaggle",
+    "hubspot",
+    "playwright",
+    "sequelize",
+    "typescript",
+    "data-pipeline"
+  ],
+  "author": "Avinash Kumar",
+  "license": "MIT"
+}
