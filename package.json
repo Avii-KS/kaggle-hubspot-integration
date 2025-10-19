@@ -7,7 +7,7 @@
     "start": "ts-node src/index.ts",
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "test": "echo \"Tests coming soon\" && exit 0"
+    "test": "ts-node src/index.ts"
   },
   "keywords": [
     "kaggle",
