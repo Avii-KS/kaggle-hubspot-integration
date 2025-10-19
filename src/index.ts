@@ -1,105 +1,157 @@
+/**
+ * Kaggle → HubSpot Integration
+ *
+ * Simple pipeline: Download baby names from Kaggle, store in MySQL, sync to HubSpot
+ * No fancy stuff, just gets the job done reliably.
+ *
+ * @author Avinash Kumar Sah
+ * @date October 2025
+ */
+
 import { KaggleService } from "./services/kaggle.service";
 import { DatabaseService } from "./services/database.service";
 import { HubSpotService } from "./services/hubspot.service";
 import { CSVParser } from "./utils/csv-parser.util";
-import {
-  connectDatabase,
-  syncDatabase,
-  sequelize,
-} from "./database/connection";
+import { connectDatabase, sequelize } from "./database/connection";
 import { validateConfig } from "./config/environment.config";
 
-async function main() {
-  console.log("\n==============================================");
-  console.log("🚀 Kaggle to HubSpot Integration Pipeline");
-  console.log("==============================================\n");
+// Simple configuration - change these values as needed
+const CONFIG = {
+  DEMO_MODE: true, // Set false to process all records
+  CSV_LIMIT: 5000, // Records to process in demo mode
+  DB_BATCH_SIZE: 1000, // How many records to insert at once
+  HUBSPOT_LIMIT: 50, // How many contacts to sync
+};
 
-  // Step 1: Validate environment
-  console.log("📋 Step 1: Validating configuration...");
-  if (!validateConfig()) {
-    console.error(
-      "❌ Configuration validation failed. Please check your .env file."
-    );
-    process.exit(1);
-  }
-  console.log("✅ Configuration validated\n");
+async function main() {
+  console.log("\n🚀 Starting pipeline...\n");
+  const startTime = Date.now();
 
   // Initialize services
-  const kaggleService = new KaggleService();
-  const dbService = new DatabaseService();
-  const hubspotService = new HubSpotService();
-  const csvParser = new CSVParser();
+  const kaggle = new KaggleService();
+  const database = new DatabaseService();
+  const hubspot = new HubSpotService();
+  const parser = new CSVParser();
 
   try {
-    // Step 2: Connect to database
-    console.log("📋 Step 2: Connecting to database...");
-    await connectDatabase();
-    await syncDatabase();
-    console.log("");
-
-    // Step 3: Initialize Playwright and login to Kaggle
-    console.log("📋 Step 3: Logging into Kaggle...");
-    await kaggleService.initialize();
-    await kaggleService.login();
-    console.log("");
-
-    // Step 4: Download dataset
-    console.log("📋 Step 4: Downloading dataset from Kaggle...");
-    const zipPath = await kaggleService.downloadDataset();
-    console.log("");
-
-    // Step 5: Extract ZIP and parse CSV
-    console.log("📋 Step 5: Extracting and parsing data...");
-    const csvPath = await csvParser.extractZipFile(zipPath);
-    const babyNameRecords = await csvParser.parseCSV(csvPath);
-    console.log("");
-
-    // Step 6: Save to database
-    console.log("📋 Step 6: Saving to MySQL database...");
-    await dbService.saveBabyNames(babyNameRecords);
-    console.log("");
-
-    // Step 7: Retrieve from database
-    console.log("📋 Step 7: Retrieving data from database...");
-    const savedRecords = await dbService.getAllBabyNames();
-    console.log("");
-
-    // Step 8: Test HubSpot connection
-    console.log("📋 Step 8: Testing HubSpot connection...");
-    const isConnected = await hubspotService.testConnection();
-    if (!isConnected) {
-      throw new Error("Failed to connect to HubSpot");
+    // Step 1: Check configuration
+    console.log("→ Checking configuration...");
+    if (!validateConfig()) {
+      throw new Error("Configuration missing. Check your .env file.");
     }
-    console.log("");
+    console.log("  ✓ Configuration valid\n");
 
-    // Step 9: Push to HubSpot (limit to first 50 for demo)
-    console.log("📋 Step 9: Syncing to HubSpot CRM...");
-    await hubspotService.createContactsBatch(savedRecords, 50);
-    console.log("");
+    // Step 2: Connect to database
+    console.log("→ Connecting to database...");
+    await connectDatabase();
+    console.log("  ✓ Database connected\n");
 
-    console.log("==============================================");
-    console.log("🎉 Pipeline completed successfully!");
-    console.log("==============================================\n");
+    // Step 3: Check if data already exists
+    const existingCount = await database.getRecordCount();
 
-    console.log("📊 Summary:");
-    console.log(`   - Records parsed: ${babyNameRecords.length}`);
-    console.log(`   - Records in database: ${savedRecords.length}`);
-    console.log(
-      `   - Records synced to HubSpot: ${Math.min(50, savedRecords.length)}`
-    );
-    console.log("");
+    if (existingCount > 0) {
+      console.log("→ Checking existing data...");
+      console.log(
+        `  ℹ️  Database already contains ${existingCount.toLocaleString()} records`
+      );
+      console.log("  ℹ️  Skipping download (using existing data)\n");
+    } else {
+      // Only download and process if database is empty
+      console.log("→ Downloading dataset from Kaggle...");
+      const zipFile = await kaggle.downloadDataset();
+      console.log("  ✓ Downloaded successfully\n");
+
+      console.log("→ Processing CSV data...");
+      if (CONFIG.DEMO_MODE) {
+        console.log(
+          `  (Demo mode: processing ${CONFIG.CSV_LIMIT.toLocaleString()} records)`
+        );
+      }
+
+      const csvFile = await parser.extractZipFile(zipFile);
+      const recordsProcessed = await parser.parseCSV(
+        csvFile,
+        async (batch) => {
+          await database.saveBabyNames(batch, CONFIG.DB_BATCH_SIZE);
+        },
+        CONFIG.DEMO_MODE ? CONFIG.CSV_LIMIT : undefined
+      );
+      console.log(
+        `  ✓ Processed ${recordsProcessed.toLocaleString()} records\n`
+      );
+    }
+
+    // Step 4: Sync to HubSpot
+    console.log("→ Syncing to HubSpot...");
+    const connected = await hubspot.testConnection();
+    if (!connected) {
+      throw new Error("Could not connect to HubSpot. Check your API key.");
+    }
+
+    const contacts = await database.getAllBabyNames(CONFIG.HUBSPOT_LIMIT);
+    if (contacts.length === 0) {
+      throw new Error("No records found in database to sync.");
+    }
+
+    console.log(`  ✓ Connected to HubSpot API`);
+    console.log(`  ✓ Fetched ${contacts.length} contacts to sync\n`);
+
+    // Show first few names for clarity
+    const sampleNames = contacts
+      .slice(0, 5)
+      .map((c) => c.name)
+      .join(", ");
+    console.log(`  Creating contacts: ${sampleNames}...`);
+
+    await hubspot.createContactsBatch(contacts);
+    console.log(`  ✓ Created ${contacts.length} contacts successfully\n`);
+
+    // Final summary
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+    const totalInDb = await database.getRecordCount();
+
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("✅ Pipeline completed successfully!");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    console.log(`  Records in database: ${totalInDb.toLocaleString()}`);
+    console.log(`  Synced to HubSpot: ${contacts.length}`);
+    console.log(`  Time taken: ${duration}s\n`);
+
+    if (CONFIG.DEMO_MODE) {
+      console.log("💡 Tip: Set DEMO_MODE to false to process all records\n");
+    }
   } catch (error) {
-    console.error("\n❌ Pipeline failed with error:", error);
+    // Handle errors
+    console.error("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.error("❌ Pipeline failed");
+    console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+
+    if (error instanceof Error) {
+      console.error(`  Error: ${error.message}\n`);
+
+      // Show stack trace in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("  Stack trace:");
+        console.error(error.stack);
+      }
+    } else {
+      console.error("  Unknown error occurred\n");
+    }
+
+    console.error("💡 Check README.md for troubleshooting tips\n");
     process.exit(1);
   } finally {
     // Cleanup
-    await kaggleService.close();
-    await sequelize.close();
+    try {
+      await kaggle.close();
+      await sequelize.close();
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   }
 }
 
-// Run the application
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+// Run it
+if (require.main === module) {
+  main();
+}

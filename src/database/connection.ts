@@ -8,12 +8,37 @@ export const sequelize = new Sequelize({
   username: config.database.user,
   password: config.database.password,
   database: config.database.name,
-  logging: config.app.nodeEnv === "development" ? console.log : false,
+  logging: false, // Disable SQL logging for cleaner output
   pool: {
-    max: 5,
+    max: 10,
     min: 0,
     acquire: 30000,
     idle: 10000,
+  },
+  dialectOptions: {
+    connectTimeout: 30000,
+    decimalNumbers: true,
+  },
+  retry: {
+    max: 5, // Increased from 3
+    backoffBase: 1000,
+    backoffExponent: 1.5,
+    match: [
+      /Deadlock/i,
+      /ER_NET_READ_INTERRUPTED/,
+      /ER_LOCK_DEADLOCK/,
+      /ER_LOCK_WAIT_TIMEOUT/,
+      /SequelizeConnectionError/,
+      /SequelizeConnectionRefusedError/,
+      /SequelizeHostNotFoundError/,
+      /SequelizeAccessDeniedError/,
+      /SequelizeConnectionAcquireTimeoutError/,
+      /SequelizeConnectionTimedOutError/,
+      /ETIMEDOUT/,
+      /ECONNRESET/,
+      /PROTOCOL_CONNECTION_LOST/,
+      /PROTOCOL_ENQUEUE_AFTER_FATAL_ERROR/,
+    ],
   },
 });
 
@@ -27,12 +52,4 @@ export async function connectDatabase(): Promise<void> {
   }
 }
 
-export async function syncDatabase(): Promise<void> {
-  try {
-    await sequelize.sync({ alter: true });
-    console.log("✅ Database synchronized");
-  } catch (error) {
-    console.error("❌ Database sync failed:", error);
-    throw error;
-  }
-}
+// syncDatabase removed: use migrations instead (sequelize-cli)
