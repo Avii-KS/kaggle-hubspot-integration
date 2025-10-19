@@ -11,7 +11,7 @@ export class KaggleService {
     console.log("🎭 Initializing Playwright browser...");
 
     this.browser = await chromium.launch({
-      headless: true,
+      headless: true, // Set to false to see browser during development
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
@@ -30,22 +30,28 @@ export class KaggleService {
     console.log("🔐 Logging into Kaggle...");
 
     try {
+      // Navigate to Kaggle login page
       await this.page.goto("https://www.kaggle.com/account/login", {
         waitUntil: "networkidle",
         timeout: 30000,
       });
 
+      // Fill email
       await this.page.fill('input[type="email"]', config.kaggle.email);
       await this.page.click('button:has-text("Continue")');
 
+      // Wait for password field
       await this.page.waitForSelector('input[type="password"]', {
         timeout: 5000,
       });
 
+      // Fill password
       await this.page.fill('input[type="password"]', config.kaggle.password);
 
+      // Click sign in
       await this.page.click('button[type="submit"]');
 
+      // Wait for navigation after login
       await this.page.waitForNavigation({
         waitUntil: "networkidle",
         timeout: 30000,
@@ -64,6 +70,7 @@ export class KaggleService {
     console.log("📥 Navigating to dataset page...");
 
     try {
+      // Navigate to dataset
       await this.page.goto(config.kaggle.datasetUrl, {
         waitUntil: "networkidle",
         timeout: 30000,
@@ -71,6 +78,7 @@ export class KaggleService {
 
       console.log("⏳ Waiting for download button...");
 
+      // Wait for and click download button
       const downloadPromise = this.page.waitForEvent("download");
       await this.page.click(
         'button:has-text("Download"), a:has-text("Download")'
@@ -78,6 +86,7 @@ export class KaggleService {
 
       const download = await downloadPromise;
 
+      // Save file
       const fileName = download.suggestedFilename();
       const filePath = path.join(config.app.downloadPath, fileName);
 

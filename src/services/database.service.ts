@@ -1,4 +1,4 @@
-import { BabyName } from "../database/models/BabyName.model";
+import { BabyName } from "../database/models/BabyName";
 import { BabyNameRecord } from "../utils/csv-parser.util";
 
 export class DatabaseService {

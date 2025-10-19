@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as csv from "csv-parser";
-import * as AdmZip from "adm-zip";
+import AdmZip from "adm-zip";
 import * as path from "path";
 
 export interface BabyNameRecord {

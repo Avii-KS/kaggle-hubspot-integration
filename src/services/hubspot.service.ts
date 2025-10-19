@@ -1,5 +1,5 @@
 import { Client } from "@hubspot/api-client";
-import { BabyName } from "../database/models/BabyName.model";
+import { BabyName } from "../database/models/BabyName";
 import { config } from "../config/environment.config";
 
 export class HubSpotService {
