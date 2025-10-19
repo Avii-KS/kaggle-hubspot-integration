@@ -29,6 +29,46 @@ Kaggle Login → CSV Download → Database Storage → HubSpot Sync → ✅ Comp
     (3s)          (2s)            (4s)              (12s)         (21s total)
 ```
 
+### 📸 Pipeline Overview
+
+![Kaggle to HubSpot Integration Pipeline](./screenshots/Kaggle%20to%20Hubspot%20Integration%20Pipeline.png)
+_Complete data pipeline architecture_
+
+![Data Processing Pipeline](./screenshots/Data%20Processing%20Pipeline%20Funnel.png)
+_Data transformation and processing flow_
+
+### 🔄 Pipeline Execution
+
+#### Terminal Output Progress
+
+![Terminal Progress 1](./screenshots/Terminal%20Output%201.png)
+_Initial setup and Kaggle authentication_
+
+![Terminal Progress 2](./screenshots/Terminal%20Output%202.png)
+_Data processing and database operations_
+
+![Terminal Progress 3](./screenshots/Terminal%20Output%203.png)
+_HubSpot integration and completion_
+
+### 📊 Database Integration
+
+![MySQL Baby Names Table](./screenshots/MYSQL%20Babynames%20table.png)
+_MySQL database with processed baby names_
+
+![Name Column Details](./screenshots/MYSQL%20db%20name%20column.png)
+_Database schema showing name field details_
+
+### 🔌 HubSpot Integration Results
+
+![HubSpot Overview](./screenshots/Hubspot%20Overview.png)
+_HubSpot dashboard showing imported contacts_
+
+![HubSpot Integration Logs](./screenshots/Hubspot%20Log%20After%20Integration.png)
+_Successful integration confirmation and logs_
+
+![Integration Pipeline Details](./screenshots/Kaggle%20to%20Hubspot%20Integration%20Pipeline%202.png)
+_Detailed view of the integration architecture_
+
 ---
 
 ## 📋 Assignment Requirements Coverage
