@@ -141,16 +141,16 @@ This project fulfills **all requirements** specified in the Emma Robot technical
 | Kaggle Login          | ~3s      | -       | -        |
 | CSV Download          | ~2s      | 2.4 MB  | 1.2 MB/s |
 | CSV Parsing           | ~1s      | 69,350  | 69K/s    |
-| Database Insert       | ~4s      | 69,350  | 17K/s    |
-| HubSpot Sync (Demo)   | ~12s     | 50      | 4/s      |
-| **Total (Demo Mode)** | **~22s** | **50**  | -        |
+| Database Insert       | ~2s      | 69,350  | 17K/s    |
+| HubSpot Sync (Demo)   | ~4s      | 50      | 4/s      |
+| **Total (Demo Mode)** | **~12s** | **50**  | -        |
 
 ### Scaling Estimates
 
-- **50 contacts:** ~25 seconds
+- **50 contacts:** ~12 seconds
 - **500 contacts:** ~2 minutes
-- **5,000 contacts:** ~20 minutes
-- **69,350 contacts (full):** ~4.5 hours\*
+- **5,000 contacts:** ~17 minutes
+- **69,350 contacts (full):** ~3.9 hours\*
 
 \*_HubSpot rate limiting (100 requests/10s) is the primary bottleneck_
 
