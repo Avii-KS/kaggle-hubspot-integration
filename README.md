@@ -26,7 +26,7 @@
 ```
 🚀 Pipeline Execution Flow:
 Kaggle Login → CSV Download → Database Storage → HubSpot Sync → ✅ Complete
-    (3s)          (2s)            (4s)              (12s)         (21s total)
+    (3s)          (2s)            (3s)              (4s)         (12s total)
 ```
 
 ### 📸 Pipeline Overview
