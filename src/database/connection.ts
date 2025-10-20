@@ -8,7 +8,7 @@ export const sequelize = new Sequelize({
   username: config.database.user,
   password: config.database.password,
   database: config.database.name,
-  logging: false, // Disable SQL logging for cleaner output
+  logging: false,
   pool: {
     max: 10,
     min: 0,
@@ -20,7 +20,7 @@ export const sequelize = new Sequelize({
     decimalNumbers: true,
   },
   retry: {
-    max: 5, // Increased from 3
+    max: 5, 
     backoffBase: 1000,
     backoffExponent: 1.5,
     match: [
@@ -52,4 +52,3 @@ export async function connectDatabase(): Promise<void> {
   }
 }
 
-// syncDatabase removed: use migrations instead (sequelize-cli)

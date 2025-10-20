@@ -1,15 +1,3 @@
-/**
- * Clean and efficient HubSpot contact management.
- *
- * Key features:
- * - Smart batching to respect rate limits
- * - Automatic retries on failures
- * - Clean error handling
- *
- * @author Avinash
- * @since Oct 2025
- */
-
 import { Client } from "@hubspot/api-client";
 import { BabyName } from "../database/models/BabyName";
 import { config } from "../config/environment.config";
@@ -37,7 +25,7 @@ interface ContactProperties {
 
 export class HubSpotService {
   private readonly client: Client;
-  private readonly MAX_RETRIES = 3; // Sweet spot for recovery
+  private readonly MAX_RETRIES = 3;
   private readonly RETRY_DELAY_BASE = 1000; // 1s base delay
   private readonly BATCH_SIZE = 10; // HubSpot's recommended batch size
   private readonly RATE_LIMIT_DELAY = 1000; // Prevent 429 errors

@@ -1,13 +1,3 @@
-/**
- * Kaggle → HubSpot Integration
- *
- * Simple pipeline: Download baby names from Kaggle, store in MySQL, sync to HubSpot
- * No fancy stuff, just gets the job done reliably.
- *
- * @author Avinash Kumar Sah
- * @date October 2025
- */
-
 import { KaggleService } from "./services/kaggle.service";
 import { DatabaseService } from "./services/database.service";
 import { HubSpotService } from "./services/hubspot.service";
@@ -15,7 +5,6 @@ import { CSVParser } from "./utils/csv-parser.util";
 import { connectDatabase, sequelize } from "./database/connection";
 import { validateConfig } from "./config/environment.config";
 
-// Simple configuration - change these values as needed
 const CONFIG = {
   DEMO_MODE: true, // Set false to process all records
   CSV_LIMIT: 5000, // Records to process in demo mode
@@ -145,13 +134,10 @@ async function main() {
     try {
       await kaggle.close();
       await sequelize.close();
-    } catch (error) {
-      // Ignore cleanup errors
-    }
+    } catch (error) {}
   }
 }
 
-// Run it
 if (require.main === module) {
   main();
 }

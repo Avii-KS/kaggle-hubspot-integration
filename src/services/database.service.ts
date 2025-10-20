@@ -24,8 +24,8 @@ export class DatabaseService {
     records: BabyNameRecord[],
     batchSize = 25
   ): Promise<void> {
-    const CHUNK_SIZE = 25; // Reduced chunk size for better memory management
-    const DELAY_MS = 2000; // Increased delay between operations
+    const CHUNK_SIZE = 25;
+    const DELAY_MS = 2000;
     const MAX_RETRIES = 5;
     const totalRecords = records.length;
     let processedRecords = 0;
@@ -66,7 +66,6 @@ export class DatabaseService {
       transaction?: Transaction
     ): Promise<void> => {
       try {
-        // Create values string for SQL insert
         const values = chunk
           .map(
             (record) =>
@@ -76,10 +75,8 @@ export class DatabaseService {
           )
           .join(",");
 
-        // Use raw SQL insert with multiple values
         const sql = `INSERT IGNORE INTO baby_names (name, sex) VALUES ${values}`;
 
-        // Execute raw query within transaction
         await sequelize.query(sql, {
           raw: true,
           transaction,
@@ -93,7 +90,6 @@ export class DatabaseService {
           console.log(
             `\n⚠️ Retry attempt ${retryCount + 1} for current chunk...`
           );
-          // Exponential backoff
           await sleep(DELAY_MS * Math.pow(2, retryCount));
           return saveChunkWithRetry(chunk, retryCount + 1, transaction);
         }
@@ -104,17 +100,13 @@ export class DatabaseService {
     try {
       let currentBatch: BabyNameRecord[] = [];
 
-      // Process records in batches
       for (let i = 0; i < records.length; i++) {
         currentBatch.push(records[i]);
 
-        // When batch is full or we're at the last record
         if (currentBatch.length === batchSize || i === records.length - 1) {
-          // Create transaction for entire batch
           const transaction = await sequelize.transaction();
 
           try {
-            // Process current batch in chunks
             for (let j = 0; j < currentBatch.length; j += CHUNK_SIZE) {
               const chunk = currentBatch.slice(j, j + CHUNK_SIZE);
               await saveChunkWithRetry(chunk, 0, transaction);
@@ -127,7 +119,6 @@ export class DatabaseService {
                 `💾 Processed ${processedRecords.toLocaleString()} of ${totalRecords.toLocaleString()} records (${progress}%)`
               );
 
-              // Force garbage collection after each chunk
               if (global.gc) {
                 global.gc();
               }
@@ -135,19 +126,15 @@ export class DatabaseService {
               await sleep(DELAY_MS);
             }
 
-            // Commit transaction after all chunks in batch are processed
             await transaction.commit();
 
-            // Clear batch and force GC
             currentBatch = [];
             if (global.gc) {
               global.gc();
             }
 
-            // Additional delay between batches
             await sleep(DELAY_MS);
           } catch (error) {
-            // Rollback transaction on error
             await transaction.rollback();
             throw error;
           }
@@ -193,9 +180,6 @@ export class DatabaseService {
     }
   }
 
-  /**
-   * Get total count of records in the baby_names table
-   */
   public async getRecordCount(): Promise<number> {
     try {
       return await BabyName.count();
@@ -205,9 +189,6 @@ export class DatabaseService {
     }
   }
 
-  /**
-   * Clear all records from the baby_names table
-   */
   public async clearTable(): Promise<void> {
     console.log("🗑️ Clearing baby_names table...");
     try {
