@@ -1,6 +1,6 @@
 ## 🚀 Production Scaling Proposal
 
-**📄 Full Detailed Proposal:** See [PRODUCTION_PROPOSAL.md](./PRODUCTION_PROPOSAL.md)
+**📄 Full Detailed Proposal:** See [PRODUCTION_PROPOSAL.md](https://gamma.app/docs/Production-Escalation-Proposal-s09d45flzh7vuvt?mode=doc)
 
 ### Executive Summary
 
