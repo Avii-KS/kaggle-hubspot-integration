@@ -19,6 +19,7 @@
 
 **📹 Video Walkthrough:** [Watch Demo Video](https://drive.google.com/file/d/1wcrdZfldRoJuBG6OM6o-B2nyndq522U0/view?usp=sharing)  
 **📸 Production Escalation Proposal:** [Read Documentation](https://gamma.app/docs/Production-Escalation-Proposal-s09d45flzh7vuvt?mode=doc)  
+**📹 Drive Link:** [Visit](https://drive.google.com/drive/folders/1pwsCzW0hDRmusw_KuiWBAF5RBx9Y9Knw?usp=sharing)
 **⚡ Live Run:** Requires credentials (see Setup Instructions)
 
 ### Quick Preview
